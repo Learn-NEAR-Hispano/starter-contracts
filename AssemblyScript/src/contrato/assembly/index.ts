@@ -78,6 +78,9 @@ export function setCertificado(cuenta: string): bool {
     //Le transferimos al participante 5 NEAR como premio por haber logrado su certificación.
     ContractPromiseBatch.create(cuenta).transfer(u128.from(5));
 
+    participantes.set(cuenta, participante);
+    logging.log("Participante certificado. El participante ha recibido su recompensa de 5 NEAR.");
+
     return true;
   }
   else {

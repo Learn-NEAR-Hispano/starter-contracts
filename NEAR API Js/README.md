@@ -1,0 +1,3 @@
+# NEAR API Js Starter
+
+Para ejecutar este proyecto es necesario ejecutarlo en un servidor HTTP. Puedes utilizar scripts como [HTTP Server](https://www.npmjs.com/package/http-server) para NodeJs o extensiones para VsCode como [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) o para el navegador Chrome como [Web Server for Chrome](https://chrome.google.com/webstore/detail/web-server-for-chrome/ofhbbkphhbklhfoeikjpcbhemlocgigb?hl=en).

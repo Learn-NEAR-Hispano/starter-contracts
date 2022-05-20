@@ -24,7 +24,17 @@ const participantes = new PersistentUnorderedMap<string, Participante>("p");
 
 //MÉTODOS DEL CONTRATO:
 
-//Esta función te registra como participante.
+/**
+ * Método de ESCRITURA para registrar un nuevo participante
+ * El comando para utilizarlo en la terminal es:
+ *  >> near call $CONTRATO setParticipante '{"nombre":"NOMBRE","edad":18}' --accountId cuenta.near --amount 1
+ *    * $CONTRATO es una variable que contiene el id de la cuenta del contrato
+ * 
+ * @param nombre string que requiere el nombre del participante a registrar
+ * @param edad entero de 32 bits sin signo que requiere la edad del participante
+ * 
+ * Es necesario enviarle 1 NEAR (o más) como pago a este método.
+ */
 export function setParticipante(nombre: string, edad: u32): void {
 
   //Usamos el context de la transacción para obtener datos de la misma.
@@ -51,19 +61,36 @@ export function setParticipante(nombre: string, edad: u32): void {
   logging.log("Registro creado exitosamente.");
 }
 
-//Función de LECTURA. Consultamos un integrante en base a su cuenta.
+/**
+ * Método de LECTURA que regresa un participante
+ * El comando para utilizarlo en la terminal es:
+ *  >> near view $CONTRATO getParticipante '{"cuenta":"CUENTA.NEAR"}'
+ * @param cuenta string que contiene la cuenta (key) del usuario a consultar
+ * @returns Participante
+ */
 export function getParticipante(cuenta: string): Participante | null {
   return participantes.get(cuenta);
 }
 
-//Función de LECTURA. Consultamos toda la lista de participantes registrados.
+/**
+ * Método de LECTURA que regresa toda la lista de participantes registrados
+ * El comando para utilizarlo en la terminal es:
+ *  >> near view $CONTRATO getParticipantes '{}'
+ * @returns Participante[] (Arreglo de participantes)
+ */
 export function getParticipantes(): Participante[] {
   return participantes.values();
 }
 
-//Función de ESCRITURA.
-//En esta función modificamos el estado de la certificación.
-//Esta función regresa un valor booleano.
+/**
+ * Método de ESCRITURA para certificar a un participante
+ * Además, transfiere 5 NEAR como compensación al participante que se haya certificado.
+ * El comando para utilizarlo en la terminal es:
+ *  >> near call $CONTRATO setCertificado '{"cuenta":"cuenta.near"}' --accountId cuenta.near --amount 1
+ * 
+ * @param cuenta string que contiene la cuenta del participante a certificar
+ * @returns bool: Regresa verdadero o falso dependiendo de si se ejecutó la acción.
+ */
 export function setCertificado(cuenta: string): bool {
 
   //Si la cuenta ejecutando el comando no es aklassen.testnet, no podrá hacerse ningún cambio.
@@ -72,7 +99,7 @@ export function setCertificado(cuenta: string): bool {
   let participante = participantes.get(cuenta);
 
   //Necesitamos evaluar si la línea de arriba encontró al participante.
-  if (participante) {
+  if (participante && participante.certificado == false) {
     participante.certificado = true;
 
     //Le transferimos al participante 5 NEAR como premio por haber logrado su certificación.
@@ -84,7 +111,7 @@ export function setCertificado(cuenta: string): bool {
     return true;
   }
   else {
-    logging.log("Participante no encontrado.");
+    logging.log("Participante no encontrado o participante ya certificado.");
     return false;
   }
 }

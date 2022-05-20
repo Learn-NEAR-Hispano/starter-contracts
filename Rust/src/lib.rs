@@ -56,6 +56,13 @@ impl Participante {
 
 #[near_bindgen]
 impl NcdContract {
+    /// Método de ESCRITURA para registrar un nuevo participante
+    /// El comando para utilizarlo en la terminal es:
+    /// >> near call $CONTRATO set_participante '{"nombre":"NOMBRE","edad":18}' --accountId cuenta.near --amount 1
+    ///  $CONTRATO es una variable que contiene el id de la cuenta del contrato
+    /// @param nombre string que requiere el nombre del participante a registrar
+    /// @param edad entero de 64 bits sin signo que requiere la edad del participante
+    /// Es necesario enviarle 1 NEAR (o más) como pago a este método.
     #[payable]
     pub fn set_participante(&mut self, nombre: String, edad: u64) {
         let cuenta = env::signer_account_id();
@@ -78,14 +85,30 @@ impl NcdContract {
         env::log(format!("Registro creado exitosamente.").as_bytes());
     }
 
+    /// Método de LECTURA que regresa un participante
+    /// El comando para utilizarlo en la terminal es:
+    /// >> near view $CONTRATO get_participante '{"cuenta":"CUENTA.NEAR"}'
+    /// @param cuenta string que contiene la cuenta (key) del usuario a consultar
+    /// @returns Option<Participante>
     pub fn get_participante(&self, cuenta: String) -> Option<Participante> {
         self.participantes.get(&cuenta)
     }
 
+    /// Método de LECTURA que regresa toda la lista de participantes registrados
+    /// El comando para utilizarlo en la terminal es:
+    ///  >> near view $CONTRATO get_participantes '{}'
+    /// @returns Vec<(String, Participante)> (vector de participantes)
     pub fn get_participantes(&self) -> Vec<(String, Participante)> {
         self.participantes.to_vec()
     }
 
+    /// Método de ESCRITURA para certificar a un participante
+    /// Además, transfiere 5 NEAR como compensación al participante que se haya certificado.
+    /// El comando para utilizarlo en la terminal es:
+    ///  >> near call $CONTRATO set_certificado '{"cuenta":"cuenta.near"}' --accountId cuenta.near --amount 1
+    ///
+    /// @param cuenta string que contiene la cuenta del participante a certificar
+    /// @returns bool: Regresa verdadero o falso dependiendo de si se ejecutó la acción.
     pub fn set_certificado(&mut self, cuenta: String) -> bool {
         assert!(
             env::signer_account_id() == "aklassen.testnet",

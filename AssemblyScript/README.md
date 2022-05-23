@@ -12,6 +12,12 @@ Este repositorio contiene un contrato inteligente con los siguientes métodos:
 * `getParticipante`
 * `getParticipantes`
 
+El contrato se encuentra previamente desplegado en la cuenta `as.ncdsamples.testnet`. Puedes hacer llamadas al mismo de la siguiente manera:
+
+```sh
+near view as.ncdsamples.testnet getParticipantes
+```
+
 ## Uso
 
 ### Compilando y desplegando
@@ -22,10 +28,22 @@ Lo primero que debemos hacer es instalar las dependencias necesarias para que el
 npm install
 ```
 
+ó
+
+```sh
+yarn install
+```
+
 Una vez hecho esto, podemos compilar el código.
 
 ```sh
 npm run build
+```
+
+ó
+
+```sh
+yarn build
 ```
 
 El contrato compilado en WebAssembly se guarda en la carpeta `AssemblyScript/build/release/`. Ahora solo es necesario desplegarlo en una cuenta de desarrollo.
@@ -48,7 +66,7 @@ Haciendo esto, podemos comprobar que la variable `CONTRATO` tiene almacenada nue
 echo $CONTRATO
 ```
 
-### Métodos de escritura
+### Métodos
 
 Lo primero que debemos hacer es registrar al menos un usuario en el contrato. Para esto utilizamos el método `setParticipante`. Este método requiere que se pague 1 NEAR para poder ser ejecutado. El método registra a la persona que lo está ejecutando como participante.
 
@@ -63,7 +81,7 @@ near view $CONTRATO getParticipante '{"cuenta":"cuenta.testnet"}'
 ```
 
 ```sh
-near view $CONTRATO getParticipantes '{}'
+near view $CONTRATO getParticipantes
 ```
 
 Por último, si queremos marcar como certificado a uno de los participantes registrados, podemos hacer uso del método `setCertificado`. Este método tiene una restricción en la que, si tu cuenta no es `aklassen.testnet` especificamente no te permitirá ejecutarlo. Esta es una forma de agregar una restricción a cuentas específicas. Puedes modificar esta cuenta en el código del contrato. Además, el método transfiere una compensación de 5 NEAR al participante por haber logrado su certificación.

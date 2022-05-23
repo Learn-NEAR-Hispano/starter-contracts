@@ -12,6 +12,12 @@ Este repositorio contiene un contrato inteligente con los siguientes métodos:
 * `get_participante`
 * `get_participantes`
 
+El contrato se encuentra previamente desplegado en la cuenta `rust.ncdsamples.testnet`. Puedes hacer llamadas al mismo de la siguiente manera:
+
+```sh
+near view rust.ncdsamples.testnet get_participantes
+```
+
 ## Uso
 
 ### Compilando y desplegando
@@ -38,7 +44,7 @@ Haciendo esto, podemos comprobar que la variable `CONTRATO` tiene almacenada nue
 echo $CONTRATO
 ```
 
-### Métodos de escritura
+### Métodos
 
 Lo primero que debemos hacer es registrar al menos un usuario en el contrato. Para esto utilizamos el método `set_participante`. Este método requiere que se pague 1 NEAR para poder ser ejecutado. El método registra a la persona que lo está ejecutando como participante.
 
@@ -53,7 +59,7 @@ near view $CONTRATO get_participante '{"cuenta":"cuenta.testnet"}'
 ```
 
 ```sh
-near view $CONTRATO get_participantes '{}'
+near view $CONTRATO get_participantes
 ```
 
 Por último, si queremos marcar como certificado a uno de los participantes registrados, podemos hacer uso del método `set_certificado`. Este método tiene una restricción en la que, si tu cuenta no es `aklassen.testnet` especificamente no te permitirá ejecutarlo. Esta es una forma de agregar una restricción a cuentas específicas. Puedes modificar esta cuenta en el código del contrato. Además, el método transfiere una compensación de 5 NEAR al participante por haber logrado su certificación.
@@ -61,4 +67,3 @@ Por último, si queremos marcar como certificado a uno de los participantes regi
 ```sh
 near call $CONTRATO set_certificado '{"cuenta":"cuenta.testnet"}' --accountId cuenta.testnet
 ```
-

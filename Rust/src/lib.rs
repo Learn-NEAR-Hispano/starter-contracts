@@ -3,26 +3,32 @@ use near_sdk::collections::UnorderedMap;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{env, near_bindgen, setup_alloc, Promise};
 
+//Función que nos regresa el valor de 1 NEAR en un u128
 fn one_near() -> u128 {
     u128::from_str_radix("1000000000000000000000000", 10).unwrap()
 }
 
 setup_alloc!();
 
+//Definimos el struct principal.
+//Si nuestro contrato necesitara más colecciones, estas se definen aquí.
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct NcdContract {
     participantes: UnorderedMap<String, Participante>,
 }
 
+//E inicializamos el contrato por default
 impl Default for NcdContract {
     fn default() -> Self {
         Self {
+            //Inicializamos la colección con un prefijo único
             participantes: UnorderedMap::new(b"p".to_vec()),
         }
     }
 }
 
+//Definimos los structs que utilizaremos dentro del contrato
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Participante {
@@ -32,6 +38,7 @@ pub struct Participante {
     pub certificado: bool,
 }
 
+//En este contrato no se utiliza el default, pero es buena práctica tenerlo inicializado.
 impl Default for Participante {
     fn default() -> Self {
         Participante {
@@ -43,6 +50,7 @@ impl Default for Participante {
     }
 }
 
+//Creamos la implementación del método new. El equivalente en AS sería el constructor.
 impl Participante {
     pub fn new(cuenta: String, nombre: String, edad: u64) -> Self {
         Self {
@@ -54,6 +62,7 @@ impl Participante {
     }
 }
 
+//Igual que con el struct de Participante, implementamos los métodos del contrato en un impl.
 #[near_bindgen]
 impl NcdContract {
     /// Método de ESCRITURA para registrar un nuevo participante
@@ -74,7 +83,7 @@ impl NcdContract {
             "El nombre debe contener 3 o más caractéres."
         );
         assert!(
-            deposito > one_near(),
+            deposito >= one_near(),
             "Debes de pagar 1 NEAR para registrarte."
         );
 
@@ -97,9 +106,9 @@ impl NcdContract {
     /// Método de LECTURA que regresa toda la lista de participantes registrados
     /// El comando para utilizarlo en la terminal es:
     ///  >> near view $CONTRATO get_participantes '{}'
-    /// @returns Vec<(String, Participante)> (vector de participantes)
-    pub fn get_participantes(&self) -> Vec<(String, Participante)> {
-        self.participantes.to_vec()
+    /// @returns Vec<Participante> (vector de participantes)
+    pub fn get_participantes(&self) -> Vec<Participante> {
+        self.participantes.values_as_vector().to_vec()
     }
 
     /// Método de ESCRITURA para certificar a un participante

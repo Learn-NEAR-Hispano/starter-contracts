@@ -20,7 +20,7 @@ class Participante {
 }
 
 //Creamos una colección para almacenar información en nuestro contrato.
-const participantes = new PersistentUnorderedMap<string, Participante>("p");
+export const participantes = new PersistentUnorderedMap<string, Participante>("p");
 
 //MÉTODOS DEL CONTRATO:
 
@@ -47,7 +47,7 @@ export function setParticipante(nombre: string, edad: u32): void {
   //* Paguen 1 NEAR cada que se registren
   assert(edad > 0, "Edad inválida.");
   assert(nombre.length >= 3, "El nombre debe contener 3 o más caractéres.");
-  assert(deposito > ONE_NEAR, "Debes de pagar 1 NEAR para registrarte.");
+  assert(deposito >= ONE_NEAR, "Debes de pagar 1 NEAR para registrarte.");
 
   //Instanciamos la clase (creamos un objeto) y le mandamos los datos al constructor.
   let participante = new Participante(cuenta, nombre, edad);
@@ -103,7 +103,7 @@ export function setCertificado(cuenta: string): bool {
     participante.certificado = true;
 
     //Le transferimos al participante 5 NEAR como premio por haber logrado su certificación.
-    ContractPromiseBatch.create(cuenta).transfer(u128.from(5));
+    ContractPromiseBatch.create(cuenta).transfer(u128.mul(ONE_NEAR, u128.from(5)));
 
     participantes.set(cuenta, participante);
     logging.log("Participante certificado. El participante ha recibido su recompensa de 5 NEAR.");

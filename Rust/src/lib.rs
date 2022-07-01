@@ -1,14 +1,12 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::UnorderedMap;
 use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{env, near_bindgen, setup_alloc, Promise};
+use near_sdk::{env, near_bindgen, AccountId, Promise};
 
 //Función que nos regresa el valor de 1 NEAR en un u128
 fn one_near() -> u128 {
     u128::from_str_radix("1000000000000000000000000", 10).unwrap()
 }
-
-setup_alloc!();
 
 //Definimos el struct principal.
 //Si nuestro contrato necesitara más colecciones, estas se definen aquí.
@@ -74,7 +72,7 @@ impl NcdContract {
     /// Es necesario enviarle 1 NEAR (o más) como pago a este método.
     #[payable]
     pub fn set_participante(&mut self, nombre: String, edad: u64) {
-        let cuenta = env::signer_account_id();
+        let cuenta = env::signer_account_id().to_string();
         let deposito = env::attached_deposit();
 
         assert!(edad > 0, "Edad inválida.");
@@ -87,11 +85,11 @@ impl NcdContract {
             "Debes de pagar 1 NEAR para registrarte."
         );
 
-        let participante = Participante::new(String::from(&cuenta), String::from(&nombre), edad);
+        let participante = Participante::new(cuenta.clone(), String::from(&nombre), edad);
 
         self.participantes.insert(&cuenta, &participante);
 
-        env::log(format!("Registro creado exitosamente.").as_bytes());
+        env::log_str("Registro creado exitosamente.");
     }
 
     /// Método de LECTURA que regresa un participante
@@ -119,26 +117,97 @@ impl NcdContract {
     /// @param cuenta string que contiene la cuenta del participante a certificar
     /// @returns bool: Regresa verdadero o falso dependiendo de si se ejecutó la acción.
     pub fn set_certificado(&mut self, cuenta: String) -> bool {
+        let master: AccountId = "aklassen.testnet".parse().unwrap();
+
         assert!(
-            env::signer_account_id() == "aklassen.testnet",
+            env::signer_account_id() == master,
             "No tienes permisos para ejecutar este comando."
         );
+
+        let cuenta_near: AccountId = cuenta.parse().unwrap();
 
         match self.participantes.get(&cuenta) {
             Some(mut participante) => {
                 participante.certificado = true;
 
-                Promise::new(String::from(&cuenta)).transfer(5 as u128);
+                Promise::new(cuenta_near).transfer(5 as u128);
                 self.participantes.insert(&cuenta, &participante);
 
-                env::log(format!("Participante certificado. El participante ha recibido su recompensa de 5 NEAR.").as_bytes());
+                env::log_str("Participante certificado. El participante ha recibido su recompensa de 5 NEAR.");
 
                 true
             }
             None => {
-                env::log(format!("Participante no encontrado.").as_bytes());
+                env::log_str("Participante no encontrado.");
                 false
             }
         }
+    }
+}
+
+// PRUEBAS UNITARIAS
+// Para correr las pruebas unitarias ejecuta el comando: cargo test
+// Puedes encontrar más información en: https://doc.rust-lang.org/rust-by-example/testing/unit_testing.html
+#[cfg(not(target_arch = "wasm32"))]
+#[cfg(test)]
+mod tests {
+    use near_sdk::test_utils::VMContextBuilder;
+    use near_sdk::testing_env;
+
+    use super::*;
+
+    const CUENTA: &str = "participante.testnet";
+    const NOMBRE: &str = "Participante";
+    const EDAD: u64 = 18;
+
+    fn set_context() {
+        let mut context = VMContextBuilder::new();
+        testing_env!(context.build());
+
+        testing_env!(context
+            .attached_deposit(one_near())
+            .signer_account_id(CUENTA.parse().unwrap())
+            .build());
+    }
+
+    #[test]
+    pub fn test_set_participante() {
+        set_context();
+        let mut contrato = NcdContract::default();
+
+        contrato.set_participante(String::from(NOMBRE), EDAD);
+
+        let p = contrato.participantes.get(&String::from(CUENTA)).unwrap();
+
+        assert_eq!(p.cuenta, CUENTA.to_string());
+        assert_eq!(p.nombre, NOMBRE);
+        assert_eq!(p.edad, EDAD);
+        assert_eq!(p.certificado, false);
+    }
+
+    #[test]
+    #[should_panic(expected = "Edad inválida.")]
+    pub fn test_set_participante_edad() {
+        set_context();
+        let mut contrato = NcdContract::default();
+
+        contrato.set_participante(String::from(NOMBRE), 0);
+    }
+
+    #[test]
+    #[should_panic(expected = "El nombre debe contener 3 o más caractéres.")]
+    pub fn test_set_participante_nombre() {
+        set_context();
+        let mut contrato = NcdContract::default();
+
+        contrato.set_participante(String::from("p"), EDAD);
+    }
+
+    #[test]
+    #[should_panic(expected = "Debes de pagar 1 NEAR para registrarte.")]
+    pub fn test_set_participante_monto() {
+        let mut contrato = NcdContract::default();
+
+        contrato.set_participante(String::from(NOMBRE), EDAD);
     }
 }

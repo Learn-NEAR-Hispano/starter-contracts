@@ -6,4 +6,3 @@ export RUSTFLAGS="-C link-arg=-s --remap-path-prefix $PWD=/pwd --remap-path-pref
 cargo build --target wasm32-unknown-unknown --release
 mkdir -p res
 cp target/wasm32-unknown-unknown/release/*.wasm ./res
-near dev-deploy --wasmFile res/*.wasm

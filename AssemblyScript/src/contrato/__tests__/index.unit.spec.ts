@@ -5,24 +5,25 @@ import { VMContext } from "near-sdk-as";
 
 const NOMBRE = "Participante";
 const EDAD = 18;
+const CUENTA = "participante.testnet"
 
 const setContext = (): void => {
   //Variables del contexto
   VMContext.setAttached_deposit(ONE_NEAR);
-  VMContext.setSigner_account_id("participante");
+  VMContext.setSigner_account_id(CUENTA);
 };
 
-describe("SetParticipante", () => {
+describe("Pruebas para método setParticipante", () => {
   it("Registra un participante con sus respectivos datos.", () => {
 
     setContext();
 
     contrato.setParticipante(NOMBRE, EDAD);
 
-    const p = participantes.get("participante");
+    const p = participantes.get(CUENTA);
 
     if (p) {
-      expect(p.cuenta).toBe("participante")
+      expect(p.cuenta).toBe(CUENTA)
       expect(p.nombre).toBe(NOMBRE)
       expect(p.edad).toBe(EDAD)
       expect(p.certificado).toBe(false)
@@ -48,5 +49,14 @@ describe("SetParticipante", () => {
     expect(() => {
       contrato.setParticipante(NOMBRE, EDAD);
     }).toThrow("Debes de pagar 1 NEAR para registrarte.");
+  })
+})
+
+
+describe("SetCertificado", () => {
+  it("Requiere que aklassen.testnet sea quien ejecute el método.", () => {
+    expect(() => {
+      contrato.setCertificado(CUENTA)
+    }).toThrow("No tienes permisos para ejecutar este comando.")
   })
 })

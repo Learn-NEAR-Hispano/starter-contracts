@@ -19,6 +19,14 @@ Puedes probar si tu instalación fue correcta utilizando el siguiente comando:
 near state ncdsamples.testnet
 ```
 
+Por último, para poder hacer llamadas a los contratos desde tu terminal es necesario hacer login con el siguiente comando:
+
+```sh
+near login
+```
+
+Se abrirá una ventana del navegador donde podrás seleccionar tu wallet.
+
 ### AssemblyScript
 
 * Código del contrato: `AssemblyScript/src/contrato/assembly/index.ts`
@@ -28,5 +36,10 @@ near state ncdsamples.testnet
 
 * Código del contrato: `Rust/src/lib.rs`
 * Cuenta pre-desplegada: `rust.ncdsamples.testnet`
+
+### JavaScript
+
+* Código del contrato: `JavaScript/src/contract.ts`
+* Cuenta pre-desplegada: `js.ncdsamples.testnet`
 
 Puedes consultar más información sobre el uso de cualquiera de las plantillas en sus respectivas carpetas.
